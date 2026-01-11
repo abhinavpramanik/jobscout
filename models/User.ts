@@ -5,6 +5,7 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   image?: string;
+  resume?: string;
   savedJobs: mongoose.Types.ObjectId[];
   appliedJobs: mongoose.Types.ObjectId[];
   role: 'user' | 'admin';
@@ -28,6 +29,9 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
     },
     image: {
+      type: String,
+    },
+    resume: {
       type: String,
     },
     savedJobs: [{

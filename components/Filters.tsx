@@ -66,8 +66,8 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
   };
 
   return (
-    <Card className="backdrop-blur-md bg-white/80 border-white/20 shadow-xl mb-8">
-      <CardContent className="p-6">
+    <Card className="backdrop-blur-md bg-white/90 dark:bg-slate-900/90 border-white/20 dark:border-slate-700/50 shadow-xl mb-8">
+      <CardContent className="p-8">
         <div className="flex items-center gap-2 mb-6">
           <Filter className="w-5 h-5 text-purple-600" />
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
@@ -79,7 +79,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search Input */}
             <div className="relative">
-              <label htmlFor="search" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="search" className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
                 Search Keywords
               </label>
               <div className="relative">
@@ -98,7 +98,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
 
             {/* Location Input */}
             <div className="relative">
-              <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="location" className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
                 Location
               </label>
               <div className="relative">
@@ -117,7 +117,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
 
           {/* Job Type Select */}
           <div>
-            <label htmlFor="jobType" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="jobType" className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
               Job Type
             </label>
             <select
@@ -125,7 +125,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
               name="jobType"
               value={filters.jobType || 'All Types'}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors"
             >
               {JOB_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -137,7 +137,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
 
           {/* Source Select */}
           <div>
-            <label htmlFor="source" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="source" className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
               Source
             </label>
             <select
@@ -145,7 +145,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
               name="source"
               value={filters.source || 'All Sources'}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors"
             >
               {SOURCES.map((source) => (
                 <option key={source} value={source}>
@@ -161,7 +161,7 @@ export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
           <Button
             type="submit"
             disabled={isLoading}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg text-base py-5"
           >
             {isLoading ? 'Searching...' : 'Apply Filters'}
           </Button>

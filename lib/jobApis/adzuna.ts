@@ -47,19 +47,33 @@ function normalizeJobType(contractTime?: string): string {
 /**
  * Format salary from Adzuna data
  */
-function formatSalary(salaryMin?: number, salaryMax?: number): string {
+function formatSalary(salaryMin?: number, salaryMax?: number, location?: string): string {
   if (!salaryMin && !salaryMax) return 'Not disclosed';
   
+  // Determine currency symbol based on location
+  let symbol = '$';
+  if (location === 'in') {
+    symbol = '₹';
+  } else if (location === 'gb') {
+    symbol = '£';
+  } else if (location === 'au') {
+    symbol = 'A$';
+  } else if (location === 'ca') {
+    symbol = 'C$';
+  } else if (['de', 'fr', 'it', 'es', 'nl'].includes(location || '')) {
+    symbol = '€';
+  }
+  
   if (salaryMin && salaryMax) {
-    return `$${salaryMin.toLocaleString()} - $${salaryMax.toLocaleString()}`;
+    return `${symbol}${salaryMin.toLocaleString()} - ${symbol}${salaryMax.toLocaleString()}`;
   }
   
   if (salaryMin) {
-    return `From $${salaryMin.toLocaleString()}`;
+    return `From ${symbol}${salaryMin.toLocaleString()}`;
   }
   
   if (salaryMax) {
-    return `Up to $${salaryMax.toLocaleString()}`;
+    return `Up to ${symbol}${salaryMax.toLocaleString()}`;
   }
   
   return 'Not disclosed';
@@ -112,7 +126,7 @@ export async function fetchAdzunaJobs(
       title: job.title,
       company: job.company.display_name || 'Company not listed',
       location: job.location.display_name || job.location.area?.[0] || 'Location not specified',
-      salary: formatSalary(job.salary_min, job.salary_max),
+      salary: formatSalary(job.salary_min, job.salary_max, location),
       experience: 'Not specified',
       jobType: normalizeJobType(job.contract_time),
       source: 'Adzuna',

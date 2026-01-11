@@ -21,6 +21,38 @@ interface JoobleResponse {
 }
 
 /**
+ * Format salary from Jooble data
+ */
+function formatSalary(salary: string): string {
+  if (!salary || salary.trim() === '') return 'Not disclosed';
+  
+  // Check if salary contains currency symbols or codes
+  const salaryLower = salary.toLowerCase();
+  
+  // If it already has a currency symbol, return as is
+  if (salary.includes('$') || salary.includes('£') || salary.includes('€') || salary.includes('₹')) {
+    return salary;
+  }
+  
+  // If it mentions INR or rupees, add ₹ symbol
+  if (salaryLower.includes('inr') || salaryLower.includes('rupee') || salaryLower.includes('lakh') || salaryLower.includes('lpa')) {
+    // Extract numbers and format with INR symbol
+    const numbers = salary.match(/[\d,]+/g);
+    if (numbers) {
+      return salary.replace(/inr/gi, '₹').replace(/rupees?/gi, '₹');
+    }
+  }
+  
+  // Check if it's just numbers (could be INR for India jobs)
+  if (/^[\d,\s-]+$/.test(salary)) {
+    // Return with note that currency might not be disclosed
+    return salary;
+  }
+  
+  return salary;
+}
+
+/**
  * Normalize job type from Jooble type field
  */
 function normalizeJobType(type?: string): string {
@@ -109,7 +141,7 @@ export async function fetchJoobleJobs(
       title: job.title,
       company: job.company || 'Company not listed',
       location: job.location || 'Location not specified',
-      salary: job.salary || 'Not disclosed',
+      salary: formatSalary(job.salary),
       experience: 'Not specified',
       jobType: normalizeJobType(job.type),
       source: 'Jooble',

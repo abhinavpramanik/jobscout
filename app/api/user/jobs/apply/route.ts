@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import Job from '@/models/Job';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+/**
+ * POST /api/user/jobs/apply
+ * Mark a job as applied
+ */
+export async function POST(request: NextRequest) {
   try {
     const session = await auth();
 
@@ -14,6 +17,15 @@ export async function GET() {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    const { jobId } = await request.json();
+
+    if (!jobId) {
+      return NextResponse.json(
+        { error: 'Job ID is required' },
+        { status: 400 }
       );
     }
 
@@ -28,22 +40,25 @@ export async function GET() {
       );
     }
 
-    // Fetch saved jobs
-    const savedJobs = await Job.find({
-      _id: { $in: user.savedJobs },
-    }).lean();
+    // Check if already applied
+    if (user.appliedJobs.includes(jobId)) {
+      return NextResponse.json(
+        { message: 'Job already marked as applied', applied: true },
+        { status: 200 }
+      );
+    }
 
-    // Fetch applied jobs
-    const appliedJobs = await Job.find({
-      _id: { $in: user.appliedJobs },
-    }).lean();
+    // Add to applied jobs
+    user.appliedJobs.push(jobId);
+    await user.save();
 
     return NextResponse.json({
-      savedJobs,
-      appliedJobs,
+      success: true,
+      message: 'Job marked as applied',
+      applied: true,
     });
   } catch (error) {
-    console.error('Error fetching user jobs:', error);
+    console.error('Error marking job as applied:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

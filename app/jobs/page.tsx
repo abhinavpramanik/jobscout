@@ -97,7 +97,7 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 md:px-10 py-5">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
@@ -145,7 +145,7 @@ export default function Home() {
 
       {/* Header */}
       <header className="relative backdrop-blur-md bg-white/30 dark:bg-slate-900/30 border-b border-white/20 dark:border-slate-700/20 shadow-lg">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-6 md:px-10 py-8">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent animate-gradient">
               Browse Jobs
@@ -157,17 +157,22 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="relative container mx-auto px-4 py-8">
+      <main className="relative container mx-auto px-6 md:px-10 py-10">
         {/* Filters */}
         <Filters onFilterChange={handleFilterChange} isLoading={loading} />
 
         {/* Stats */}
-        <div className="mb-6 text-gray-600 dark:text-gray-300">
-          <p className="text-sm">
+        <div className="mb-6">
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
             Showing {jobs.length} of {pagination.total} jobs
             {filters.search && ` for "${filters.search}"`}
             {filters.location && ` in ${filters.location}`}
           </p>
+          {filters.location?.toLowerCase().includes('india') && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">
+              💡 Note: Many employers in India don't disclose salary information in job postings. Check the job description for details.
+            </p>
+          )}
         </div>
 
         {/* Loading State */}
@@ -183,22 +188,22 @@ export default function Home() {
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <p className="font-medium">Error</p>
-            <p className="text-sm">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-6 py-4 rounded-xl shadow-lg">
+            <p className="font-semibold text-lg">Error</p>
+            <p className="text-sm mt-1">{error}</p>
           </div>
         )}
 
         {/* No Results */}
         {!loading && !error && jobs.length === 0 && (
-          <div className="text-center py-16 backdrop-blur-md bg-white/50 rounded-2xl shadow-xl border border-white/20">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-16 backdrop-blur-md bg-white/60 dark:bg-slate-900/60 rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No jobs found</h3>
-            <p className="text-gray-600">Try adjusting your search filters or check back later</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">No jobs found</h3>
+            <p className="text-slate-600 dark:text-slate-400">Try adjusting your search filters or check back later</p>
           </div>
         )}
 
@@ -224,8 +229,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative mt-12 backdrop-blur-md bg-gradient-to-r from-gray-900/90 via-blue-900/90 to-purple-900/90 text-white">
-        <div className="container mx-auto px-4 py-8 text-center">
+      <footer className="relative mt-12 backdrop-blur-md bg-gradient-to-r from-gray-900/90 via-blue-900/90 to-purple-900/90 text-white border-t border-slate-700/50">
+        <div className="container mx-auto px-6 md:px-10 py-10 text-center">
           <p className="font-semibold">&copy; 2026 JobScout - Job Aggregation Platform</p>
           <p className="text-sm text-gray-300 mt-2">Created with ❤️ by Abhinav Pramanik</p>
         </div>

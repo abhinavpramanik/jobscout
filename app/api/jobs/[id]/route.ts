@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Job from '@/models/Job';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -10,12 +11,13 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
-    const job = await Job.findById(params.id).select('-__v').lean();
+    const { id } = await params;
+    const job = await Job.findById(id).select('-__v').lean();
 
     if (!job) {
       return NextResponse.json(

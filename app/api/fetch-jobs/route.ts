@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Job from '@/models/Job';
 import { fetchAllJobs } from '@/lib/jobApis';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**

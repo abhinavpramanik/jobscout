@@ -66,7 +66,7 @@ export default function LandingPage() {
 
       {/* Navigation */}
       <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 md:px-10 py-5">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
@@ -118,7 +118,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative container mx-auto px-4 py-20 text-center">
+      <section className="relative container mx-auto px-6 md:px-10 py-24 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -134,14 +134,14 @@ export default function LandingPage() {
             Save time, find opportunities, and land your dream career.
           </p>
 
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/jobs">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white text-lg px-8">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white text-base px-8 py-6 shadow-lg hover:shadow-xl transition-all">
                 Browse Jobs <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button size="lg" variant="outline" className="text-lg px-8">
+              <Button size="lg" variant="outline" className="text-base px-8 py-6 border-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 Sign Up Free
               </Button>
             </Link>
@@ -165,7 +165,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="relative container mx-auto px-4 py-20">
+      <section className="relative container mx-auto px-6 md:px-10 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 text-slate-900 dark:text-slate-100">
             Why Choose JobScout?
@@ -195,17 +195,17 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative container mx-auto px-4 py-20">
-        <Card className="backdrop-blur-md bg-gradient-to-br from-blue-600 to-indigo-600 border-0 text-white">
-          <CardContent className="p-12 text-center">
-            <h2 className="text-4xl font-bold mb-4">
+      <section className="relative container mx-auto px-6 md:px-10 py-20">
+        <Card className="backdrop-blur-md bg-gradient-to-br from-blue-600 to-indigo-600 border-0 text-white shadow-2xl">
+          <CardContent className="p-12 md:p-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Ready to Find Your Dream Job?
             </h2>
             <p className="text-xl mb-8 text-blue-100">
               Join thousands of job seekers who trust JobScout
             </p>
             <Link href="/auth/signup">
-              <Button size="lg" variant="secondary" className="text-lg px-8">
+              <Button size="lg" variant="secondary" className="text-base px-10 py-6 shadow-lg hover:shadow-xl transition-all">
                 Get Started for Free <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
@@ -214,8 +214,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative backdrop-blur-md bg-slate-900/90 dark:bg-slate-950/90 text-white py-8 mt-20">
-        <div className="container mx-auto px-4 text-center">
+      <footer className="relative backdrop-blur-md bg-slate-900/90 dark:bg-slate-950/90 text-white py-10 mt-20 border-t border-slate-700/50">
+        <div className="container mx-auto px-6 md:px-10 text-center">
           <p className="font-semibold">&copy; 2026 JobScout - Job Aggregation Platform</p>
           <p className="text-sm text-slate-400 mt-2">Created with ❤️ by Abhinav Pramanik</p>
         </div>

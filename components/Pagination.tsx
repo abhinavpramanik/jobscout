@@ -58,7 +58,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={!hasPrevPage}
-        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-5 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
       >
         Previous
       </button>
@@ -70,12 +70,12 @@ export default function Pagination({
             key={index}
             onClick={() => typeof page === 'number' && onPageChange(page)}
             disabled={page === '...' || page === currentPage}
-            className={`min-w-[40px] px-3 py-2 rounded-md transition-colors ${
+            className={`min-w-[42px] px-3 py-2.5 rounded-lg transition-all shadow-sm ${
               page === currentPage
-                ? 'bg-blue-600 text-white font-semibold'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md'
                 : page === '...'
-                ? 'cursor-default'
-                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'cursor-default text-slate-600 dark:text-slate-400'
+                : 'border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
           >
             {page}
@@ -87,7 +87,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={!hasNextPage}
-        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="px-5 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
       >
         Next
       </button>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Job from '@/models/Job';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**

@@ -64,18 +64,33 @@ function formatSalary(
 ): string {
   if (!salaryMin && !salaryMax) return 'Not disclosed';
   
-  const symbol = currency === 'USD' ? '$' : currency;
+  // Map currency codes to symbols
+  const currencySymbols: { [key: string]: string } = {
+    'USD': '$',
+    'INR': '₹',
+    'GBP': '£',
+    'EUR': '€',
+    'AUD': 'A$',
+    'CAD': 'C$',
+    'JPY': '¥',
+    'CNY': '¥',
+  };
+  
+  const symbol = currencySymbols[currency] || currency + ' ';
+  
+  // Format numbers with appropriate locale
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US';
   
   if (salaryMin && salaryMax) {
-    return `${symbol}${salaryMin.toLocaleString()} - ${symbol}${salaryMax.toLocaleString()}`;
+    return `${symbol}${salaryMin.toLocaleString(locale)} - ${symbol}${salaryMax.toLocaleString(locale)}`;
   }
   
   if (salaryMin) {
-    return `From ${symbol}${salaryMin.toLocaleString()}`;
+    return `From ${symbol}${salaryMin.toLocaleString(locale)}`;
   }
   
   if (salaryMax) {
-    return `Up to ${symbol}${salaryMax.toLocaleString()}`;
+    return `Up to ${symbol}${salaryMax.toLocaleString(locale)}`;
   }
   
   return 'Not disclosed';

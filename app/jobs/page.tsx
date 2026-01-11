@@ -1,0 +1,235 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
+import JobCard from '@/components/JobCard';
+import Filters, { FilterState } from '@/components/Filters';
+import Pagination from '@/components/Pagination';
+import { Job, JobsResponse } from '@/types/job';
+import { Sparkles, Briefcase, User, LogOut } from 'lucide-react';
+
+export default function Home() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
+    location: '',
+    jobType: '',
+    source: '',
+  });
+
+  const fetchJobs = async (page: number, currentFilters: FilterState) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20',
+      });
+
+      if (currentFilters.search) params.append('search', currentFilters.search);
+      if (currentFilters.location) params.append('location', currentFilters.location);
+      if (currentFilters.jobType) params.append('jobType', currentFilters.jobType);
+      if (currentFilters.source) params.append('source', currentFilters.source);
+
+      const response = await fetch(`/api/jobs?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+
+      const data: JobsResponse = await response.json();
+      
+      if (data.success) {
+        setJobs(data.data);
+        setPagination(data.pagination);
+      } else {
+        setError('Failed to load jobs');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    fetchJobs(currentPage, filters);
+  }, [currentPage]);
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+    fetchJobs(1, newFilters);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 dark:bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 dark:opacity-30 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 dark:bg-blue-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 dark:opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-pink-300 dark:bg-pink-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-70 dark:opacity-30 animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                JobScout
+              </span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              {session ? (
+                <>
+                  <Link href="/profile">
+                    <Button variant="ghost" className="text-slate-700 dark:text-slate-300">
+                      <User className="w-4 h-4 mr-2" />
+                      Profile
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="text-slate-700 dark:text-slate-300"
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/signin">
+                    <Button variant="ghost" className="text-slate-700 dark:text-slate-300">Sign In</Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Header */}
+      <header className="relative backdrop-blur-md bg-white/30 dark:bg-slate-900/30 border-b border-white/20 dark:border-slate-700/20 shadow-lg">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent animate-gradient">
+              Browse Jobs
+            </h1>
+            <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">Find your dream job across multiple platforms</p>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative container mx-auto px-4 py-8">
+        {/* Filters */}
+        <Filters onFilterChange={handleFilterChange} isLoading={loading} />
+
+        {/* Stats */}
+        <div className="mb-6 text-gray-600 dark:text-gray-300">
+          <p className="text-sm">
+            Showing {jobs.length} of {pagination.total} jobs
+            {filters.search && ` for "${filters.search}"`}
+            {filters.location && ` in ${filters.location}`}
+          </p>
+        </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="relative inline-flex">
+              <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-purple-600 dark:border-r-purple-400 rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1s'}}></div>
+            </div>
+            <p className="mt-4 text-gray-700 dark:text-gray-300 font-medium animate-pulse">Loading amazing opportunities...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <p className="font-medium">Error</p>
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* No Results */}
+        {!loading && !error && jobs.length === 0 && (
+          <div className="text-center py-16 backdrop-blur-md bg-white/50 rounded-2xl shadow-xl border border-white/20">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">No jobs found</h3>
+            <p className="text-gray-600">Try adjusting your search filters or check back later</p>
+          </div>
+        )}
+
+        {/* Job Listings */}
+        {!loading && !error && jobs.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {jobs.map((job) => (
+                <JobCard key={job._id} job={job} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              hasNextPage={pagination.hasNextPage}
+              hasPrevPage={pagination.hasPrevPage}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="relative mt-12 backdrop-blur-md bg-gradient-to-r from-gray-900/90 via-blue-900/90 to-purple-900/90 text-white">
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="font-semibold">&copy; 2026 JobScout - Job Aggregation Platform</p>
+          <p className="text-sm text-gray-300 mt-2">Created with ❤️ by Abhinav Pramanik</p>
+        </div>
+      </footer>
+    </div>
+  );
+}

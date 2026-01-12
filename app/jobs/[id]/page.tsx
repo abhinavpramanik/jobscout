@@ -1,37 +1,90 @@
-import { notFound } from 'next/navigation';
+'use client';
+
+import { notFound, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Job, JobResponse } from '@/types/job';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { Job } from '@/types/job';
 import JobActions from '@/components/JobActions';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { calculateSkillMatch } from '@/lib/skillMatcher';
+import { extractSkillsFromText } from '@/lib/skillsDatabase';
 
-async function getJob(id: string): Promise<Job | null> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/jobs/${id}`, {
-      cache: 'no-store',
-    });
+export default function JobDetailPage() {
+  const params = useParams();
+  const { data: session } = useSession();
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
+  const [matchedSkills, setMatchedSkills] = useState<string[]>([]);
+  const [missingSkills, setMissingSkills] = useState<string[]>([]);
+  const [matchScore, setMatchScore] = useState<number>(0);
 
-    if (!response.ok) {
-      return null;
-    }
+  useEffect(() => {
+    const fetchJobAndSkills = async () => {
+      try {
+        // Fetch job details
+        const jobResponse = await fetch(`/api/jobs/${params.id}`, {
+          cache: 'no-store',
+        });
 
-    const data: JobResponse = await response.json();
-    return data.success ? data.data : null;
-  } catch (error) {
-    console.error('Error fetching job:', error);
-    return null;
+        if (!jobResponse.ok) {
+          notFound();
+          return;
+        }
+
+        const jobData = await jobResponse.json();
+        if (!jobData.success) {
+          notFound();
+          return;
+        }
+
+        setJob(jobData.data);
+
+        // Extract skills from job
+        const jobText = `${jobData.data.title} ${jobData.data.description} ${jobData.data.experience}`;
+        const extractedSkills = extractSkillsFromText(jobText);
+        setRequiredSkills(extractedSkills);
+
+        // Fetch user skills if logged in
+        if (session?.user) {
+          const profileResponse = await fetch('/api/user/profile');
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json();
+            const skills = profileData.user?.skills || [];
+            setUserSkills(skills);
+
+            // Calculate match
+            if (skills.length > 0 && extractedSkills.length > 0) {
+              const matchResult = calculateSkillMatch(skills, extractedSkills);
+              setMatchedSkills(matchResult.matchedSkills);
+              setMissingSkills(matchResult.missingSkills);
+              setMatchScore(matchResult.matchScore);
+            }
+          }
+        }
+      } catch (error) {
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobAndSkills();
+  }, [params.id, session]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
-}
-
-export default async function JobDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const job = await getJob(id);
 
   if (!job) {
     notFound();
+    return null;
   }
 
   return (
@@ -120,6 +173,77 @@ export default async function JobDetailPage({
               }}
             />
           </div>
+
+          {/* Required Skills Section */}
+          {requiredSkills.length > 0 && (
+            <div className="mb-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Required Skills</h3>
+                {session?.user && userSkills.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Your Match:</span>
+                    <span className={`text-lg font-bold ${
+                      matchScore >= 70 ? 'text-green-600 dark:text-green-400' :
+                      matchScore >= 50 ? 'text-blue-600 dark:text-blue-400' :
+                      matchScore >= 30 ? 'text-yellow-600 dark:text-yellow-400' :
+                      'text-red-600 dark:text-red-400'
+                    }`}>
+                      {matchScore}%
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {requiredSkills.map((skill, index) => {
+                  const isMatched = matchedSkills.includes(skill);
+                  const showStatus = session?.user && userSkills.length > 0;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all ${
+                        showStatus
+                          ? isMatched
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {showStatus && (
+                        isMatched ? (
+                          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                        )
+                      )}
+                      <span className={`text-sm font-medium ${
+                        showStatus
+                          ? isMatched
+                            ? 'text-green-900 dark:text-green-100'
+                            : 'text-red-900 dark:text-red-100'
+                          : 'text-slate-700 dark:text-slate-300'
+                      }`}>
+                        {skill}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {!session?.user && (
+                <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 italic">
+                  Sign in and upload your resume to see which skills you match!
+                </p>
+              )}
+
+              {session?.user && userSkills.length === 0 && (
+                <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 italic">
+                  Upload your resume in your profile to see which skills you match!
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Apply and Save Actions */}
           <JobActions jobId={job._id} applyLink={job.applyLink} source={job.source} />

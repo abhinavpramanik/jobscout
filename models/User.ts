@@ -4,8 +4,9 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
-  image?: string;
-  resume?: string;
+  profilePicUrl?: string; // Cloudinary URL for profile picture
+  resumeUrl?: string;     // Cloudinary URL for resume PDF
+  skills: string[];       // Skills extracted from resume
   savedJobs: mongoose.Types.ObjectId[];
   appliedJobs: mongoose.Types.ObjectId[];
   role: 'user' | 'admin';
@@ -28,11 +29,17 @@ const UserSchema: Schema<IUser> = new Schema(
     password: {
       type: String,
     },
-    image: {
+    profilePicUrl: {
       type: String,
+      default: null,
     },
-    resume: {
+    resumeUrl: {
       type: String,
+      default: null,
+    },
+    skills: {
+      type: [String],
+      default: [],
     },
     savedJobs: [{
       type: Schema.Types.ObjectId,

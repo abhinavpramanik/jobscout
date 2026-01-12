@@ -12,6 +12,10 @@ export interface Job {
   postedDate: string;
   createdAt: string;
   updatedAt: string;
+  matchScore?: number;
+  requiredSkills?: string[];
+  matchedSkills?: string[];
+  missingSkills?: string[];
 }
 
 export interface JobsResponse {

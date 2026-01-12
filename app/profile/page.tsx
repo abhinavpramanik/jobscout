@@ -2,11 +2,12 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import FileUpload from '@/components/FileUpload';
 import { 
   Briefcase, 
   MapPin, 
@@ -21,7 +22,9 @@ import {
   Camera,
   Download,
   Trash2,
-  Edit
+  Edit,
+  X,
+  Eye
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,8 +43,8 @@ interface Job {
 interface UserProfile {
   name: string;
   email: string;
-  image?: string;
-  resume?: string;
+  profilePicUrl?: string;
+  resumeUrl?: string;
   savedJobsCount: number;
   appliedJobsCount: number;
 }
@@ -56,10 +59,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [resumeUrl, setResumeUrl] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const [showProfilePicModal, setShowProfilePicModal] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [parsing, setParsing] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -90,8 +92,6 @@ export default function ProfilePage() {
         const profileData = await profileRes.json();
         setProfile(profileData.user);
         setName(profileData.user.name);
-        setImageUrl(profileData.user.image || '');
-        setResumeUrl(profileData.user.resume || '');
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error);
@@ -106,15 +106,11 @@ export default function ProfilePage() {
       const res = await fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          image: imageUrl,
-          resume: resumeUrl,
-        }),
+        body: JSON.stringify({ name }),
       });
 
       if (res.ok) {
-        await update({ name, image: imageUrl });
+        await update({ name });
         setEditMode(false);
         fetchUserData();
       }
@@ -125,29 +121,61 @@ export default function ProfilePage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // For demo purposes, we'll use a data URL
-      // In production, upload to cloud storage (S3, Cloudinary, etc.)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleFileUploadSuccess = (url: string, type: 'profilePic' | 'resume') => {
+    // Refresh user data to get updated URLs
+    fetchUserData();
+  };
+
+  const handleFileDelete = (type: 'profilePic' | 'resume') => {
+    // Refresh user data after deletion
+    fetchUserData();
+  };
+
+  const handleResumeDownload = async () => {
+    if (!profile?.resumeUrl) return;
+    
+    try {
+      const response = await fetch(profile.resumeUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${profile.name.replace(/\s+/g, '_')}_Resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading resume:', error);
     }
   };
 
-  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // For demo purposes, we'll use a data URL
-      // In production, upload to cloud storage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setResumeUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleResumePreview = () => {
+    if (profile?.resumeUrl) {
+      window.open(profile.resumeUrl, '_blank');
+    }
+  };
+
+  const handleManualParsing = async () => {
+    if (!profile?.resumeUrl) {
+      return;
+    }
+
+    setParsing(true);
+    try {
+      const response = await fetch('/api/parse-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeUrl: profile.resumeUrl }),
+      });
+
+      if (response.ok) {
+        fetchUserData();
+      }
+    } catch (error) {
+      // Silent error handling
+    } finally {
+      setParsing(false);
     }
   };
 
@@ -172,9 +200,9 @@ export default function ProfilePage() {
             {/* Profile Picture */}
             <div className="relative mb-6">
               <div className="w-32 h-32 mx-auto relative">
-                {imageUrl ? (
+                {profile?.profilePicUrl ? (
                   <Image
-                    src={imageUrl}
+                    src={profile.profilePicUrl}
                     alt={name}
                     fill
                     className="rounded-full object-cover border-4 border-blue-500"
@@ -187,18 +215,11 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setShowProfilePicModal(true)}
                   className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg transition-colors"
                 >
                   <Camera className="w-4 h-4" />
                 </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
               </div>
             </div>
 
@@ -264,45 +285,95 @@ export default function ProfilePage() {
                   Resume
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {resumeUrl ? (
-                  <div className="space-y-2">
-                    <a
-                      href={resumeUrl}
-                      download="resume.pdf"
-                      className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Resume
-                    </a>
+              <CardContent className="p-4">
+                {profile?.resumeUrl ? (
+                  <div className="space-y-3">
+                    {/* Resume Preview Card */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="bg-blue-100 dark:bg-blue-900/50 p-4 rounded-full">
+                          <FileText className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                        </div>
+                      </div>
+                      <p className="text-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">
+                        Resume Available
+                      </p>
+                      
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-10 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 border-blue-300 dark:border-blue-700"
+                          onClick={handleResumeDownload}
+                        >
+                          <Eye className="w-4 h-4 mr-0" />
+                          Preview
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className=" h-10 bg-white dark:bg-slate-800 hover:bg-green-50 dark:hover:bg-green-900/30 border-green-300 dark:border-green-700 "
+                          onClick={handleResumeDownload}
+                        >
+                          <Download className="w-4 h-4 mr-0" />
+                          Download
+                        </Button>
+                      </div>
+
+                      {/* Parse Resume Button */}
+                      <Button
+                        onClick={handleManualParsing}
+                        disabled={parsing}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white mt-2"
+                        size="sm"
+                      >
+                        {parsing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Parsing...
+                          </>
+                        ) : (
+                          <>
+                            <Settings className="w-4 h-4 mr-2" />
+                            Extract Skills
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    {/* Update Button */}
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full"
-                      onClick={() => resumeInputRef.current?.click()}
+                      className="w-full h-10 border-dashed border-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      onClick={() => setShowResumeModal(true)}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Update Resume
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => resumeInputRef.current?.click()}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Resume
-                  </Button>
+                  <div className="text-center py-8">
+                    <div className="flex items-center justify-center mb-4">
+                      <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full">
+                        <FileText className="w-10 h-10 text-slate-400" />
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                      No resume uploaded yet
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-indigo-600 hover:to-purple-600 border-0"
+                      onClick={() => setShowResumeModal(true)}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Resume
+                    </Button>
+                  </div>
                 )}
-                <input
-                  ref={resumeInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={handleResumeUpload}
-                />
               </CardContent>
             </Card>
 
@@ -321,8 +392,6 @@ export default function ProfilePage() {
                     onClick={() => {
                       setEditMode(false);
                       setName(profile?.name || '');
-                      setImageUrl(profile?.image || '');
-                      setResumeUrl(profile?.resume || '');
                     }}
                     variant="outline"
                     className="w-full"
@@ -483,6 +552,82 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
+
+      {/* Profile Picture Upload Modal */}
+      {showProfilePicModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Upload Profile Picture
+              </h2>
+              <button
+                onClick={() => setShowProfilePicModal(false)}
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <FileUpload
+                type="profilePic"
+                currentUrl={profile?.profilePicUrl}
+                onUploadSuccess={(url) => handleFileUploadSuccess(url, 'profilePic')}
+                onDelete={() => handleFileDelete('profilePic')}
+              />
+            </div>
+
+            <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+              <Button
+                onClick={() => setShowProfilePicModal(false)}
+                variant="outline"
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Upload Modal */}
+      {showResumeModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Upload Resume
+              </h2>
+              <button
+                onClick={() => setShowResumeModal(false)}
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <FileUpload
+                type="resume"
+                currentUrl={profile?.resumeUrl}
+                onUploadSuccess={(url) => handleFileUploadSuccess(url, 'resume')}
+                onDelete={() => handleFileDelete('resume')}
+              />
+            </div>
+
+            <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+              <Button
+                onClick={() => setShowResumeModal(false)}
+                variant="outline"
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

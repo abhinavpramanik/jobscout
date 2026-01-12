@@ -10,6 +10,8 @@ import Filters, { FilterState } from '@/components/Filters';
 import Pagination from '@/components/Pagination';
 import { Job, JobsResponse } from '@/types/job';
 import { Sparkles, Briefcase, User, LogOut } from 'lucide-react';
+import { calculateSkillMatch } from '@/lib/skillMatcher';
+import { extractSkillsFromText } from '@/lib/skillsDatabase';
 
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -31,6 +33,36 @@ export default function Home() {
     jobType: '',
     source: '',
   });
+
+  const [userSkills, setUserSkills] = useState<string[]>([]);
+
+  // Fetch user skills from profile
+  const fetchUserSkills = async () => {
+    try {
+      const res = await fetch('/api/user/profile');
+      if (res.ok) {
+        const data = await res.json();
+        setUserSkills(data.user?.skills || []);
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  // Calculate match score for a job
+  const calculateJobMatchScore = (job: Job): number => {
+    if (!userSkills || userSkills.length === 0) return 0;
+    
+    // Extract skills from job title and description
+    const jobText = `${job.title} ${job.description} ${job.experience}`;
+    const jobSkills = extractSkillsFromText(jobText);
+    
+    if (jobSkills.length === 0) return 0;
+    
+    // Calculate match
+    const matchResult = calculateSkillMatch(userSkills, jobSkills);
+    return matchResult.matchScore;
+  };
 
   const fetchJobs = async (page: number, currentFilters: FilterState) => {
     setLoading(true);
@@ -56,7 +88,31 @@ export default function Home() {
       const data: JobsResponse = await response.json();
       
       if (data.success) {
-        setJobs(data.data);
+        // Calculate match scores for each job
+        const jobsWithScores = data.data.map(job => {
+          if (!session?.user || userSkills.length === 0) {
+            return { ...job };
+          }
+
+          const jobText = `${job.title} ${job.description} ${job.experience}`;
+          const jobSkills = extractSkillsFromText(jobText);
+          const matchResult = calculateSkillMatch(userSkills, jobSkills);
+
+          return {
+            ...job,
+            matchScore: matchResult.matchScore,
+            requiredSkills: jobSkills,
+            matchedSkills: matchResult.matchedSkills,
+            missingSkills: matchResult.missingSkills,
+          };
+        });
+
+        // Sort by match score if user is logged in and has skills
+        if (session?.user && userSkills.length > 0) {
+          jobsWithScores.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+        }
+
+        setJobs(jobsWithScores);
         setPagination(data.pagination);
       } else {
         setError('Failed to load jobs');
@@ -71,9 +127,16 @@ export default function Home() {
 
   const { data: session } = useSession();
 
+  // Fetch user skills when logged in
+  useEffect(() => {
+    if (session?.user) {
+      fetchUserSkills();
+    }
+  }, [session]);
+
   useEffect(() => {
     fetchJobs(currentPage, filters);
-  }, [currentPage]);
+  }, [currentPage, userSkills]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -152,7 +215,14 @@ export default function Home() {
             </h1>
             <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
           </div>
-          <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">Find your dream job across multiple platforms</p>
+          <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">
+            Find your dream job across multiple platforms
+            {session && userSkills.length > 0 && (
+              <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
+                • {userSkills.length} skills detected from your resume
+              </span>
+            )}
+          </p>
         </div>
       </header>
 
@@ -167,6 +237,9 @@ export default function Home() {
             Showing {jobs.length} of {pagination.total} jobs
             {filters.search && ` for "${filters.search}"`}
             {filters.location && ` in ${filters.location}`}
+            {session && userSkills.length > 0 && (
+              <span className="text-blue-600 dark:text-blue-400"> (sorted by match score)</span>
+            )}
           </p>
           {filters.location?.toLowerCase().includes('india') && (
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">

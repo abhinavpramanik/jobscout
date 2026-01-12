@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, image, resume } = body;
+    const { name, profilePicUrl, resumeUrl } = body;
 
     await dbConnect();
 
@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
 
     // Update fields if provided
     if (name) user.name = name;
-    if (image !== undefined) user.image = image;
-    if (resume !== undefined) user.resume = resume;
+    if (profilePicUrl !== undefined) user.profilePicUrl = profilePicUrl;
+    if (resumeUrl !== undefined) user.resumeUrl = resumeUrl;
 
     await user.save();
 
@@ -47,8 +47,8 @@ export async function POST(request: NextRequest) {
       user: {
         name: user.name,
         email: user.email,
-        image: user.image,
-        resume: user.resume,
+        profilePicUrl: user.profilePicUrl,
+        resumeUrl: user.resumeUrl,
       },
     });
   } catch (error) {
@@ -91,8 +91,9 @@ export async function GET() {
       user: {
         name: user.name,
         email: user.email,
-        image: user.image,
-        resume: user.resume,
+        profilePicUrl: user.profilePicUrl,
+        resumeUrl: user.resumeUrl,
+        skills: user.skills || [],
         savedJobsCount: user.savedJobs?.length || 0,
         appliedJobsCount: user.appliedJobs?.length || 0,
       },

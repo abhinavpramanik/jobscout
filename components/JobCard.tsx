@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Job } from '@/types/job';
-import { MapPin, DollarSign, Briefcase, Calendar, Bookmark } from 'lucide-react';
+import { MapPin, DollarSign, Briefcase, Calendar, Bookmark, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { getMatchColor } from '@/lib/skillMatcher';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -64,6 +65,28 @@ export default function JobCard({ job }: JobCardProps) {
     }
   };
 
+  // Format date as dd/mm/yyyy
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Get match badge color
+  const getMatchBadgeColor = (score: number): string => {
+    const color = getMatchColor(score);
+    const colorMap: Record<string, string> = {
+      green: 'bg-green-500',
+      blue: 'bg-blue-500',
+      yellow: 'bg-yellow-500',
+      orange: 'bg-orange-500',
+      red: 'bg-red-500',
+    };
+    return colorMap[color] || 'bg-gray-500';
+  };
+
   return (
     <Card className="group hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90 dark:bg-slate-900/90 border-white/20 dark:border-slate-700/50 hover:scale-105 hover:-translate-y-1">
       <CardContent className="p-6">
@@ -80,9 +103,18 @@ export default function JobCard({ job }: JobCardProps) {
               {job.company}
             </p>
           </div>
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg">
-            {job.source}
-          </Badge>
+          <div className="flex flex-col gap-2 items-end">
+            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg">
+              {job.source}
+            </Badge>
+            {/* Match Score Badge */}
+            {session && job.matchScore !== undefined && job.matchScore > 0 && (
+              <Badge className={`${getMatchBadgeColor(job.matchScore)} text-white border-0 shadow-lg flex items-center gap-1`}>
+                <Award className="w-3 h-3" />
+                {job.matchScore}% Match
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3 mb-4">
@@ -117,7 +149,7 @@ export default function JobCard({ job }: JobCardProps) {
         <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-slate-700">
           <div className="flex items-center text-xs text-gray-500 dark:text-slate-400">
             <Calendar className="w-3 h-3 mr-1" />
-            <span>{new Date(job.postedDate).toLocaleDateString()}</span>
+            <span>{formatDate(job.postedDate)}</span>
           </div>
           <div className="flex gap-2">
             <Button

@@ -79,16 +79,39 @@ export async function GET(request: NextRequest) {
       sort[sortParam] = 1;
     }
 
+    // Check if any filters are applied
+    const hasFilters = search || location || company || jobType || source || minSalary;
+
     // Execute query
-    const [jobs, total] = await Promise.all([
-      Job.find(filter)
+    let jobs;
+    if (!hasFilters) {
+      // No filters applied - prioritize India-based jobs
+      const [indiaJobs, otherJobs] = await Promise.all([
+        Job.find({ ...filter, location: { $regex: 'India', $options: 'i' } })
+          .sort(sort)
+          .limit(limit)
+          .select('-__v')
+          .lean(),
+        Job.find({ ...filter, location: { $not: { $regex: 'India', $options: 'i' } } })
+          .sort(sort)
+          .limit(Math.max(0, limit - (await Job.countDocuments({ ...filter, location: { $regex: 'India', $options: 'i' } }))))
+          .select('-__v')
+          .lean()
+      ]);
+      
+      // Combine India jobs first, then others
+      jobs = [...indiaJobs, ...otherJobs].slice(skip, skip + limit);
+    } else {
+      // Filters applied - normal query
+      jobs = await Job.find(filter)
         .sort(sort)
         .skip(skip)
         .limit(limit)
         .select('-__v')
-        .lean(),
-      Job.countDocuments(filter),
-    ]);
+        .lean();
+    }
+
+    const total = await Job.countDocuments(filter);
 
     const totalPages = Math.ceil(total / limit);
 

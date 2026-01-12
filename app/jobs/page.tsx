@@ -12,6 +12,7 @@ import { Job, JobsResponse } from '@/types/job';
 import { Sparkles, Briefcase, User, LogOut } from 'lucide-react';
 import { calculateSkillMatch } from '@/lib/skillMatcher';
 import { extractSkillsFromText } from '@/lib/skillsDatabase';
+import MobileNav from '@/components/MobileNav';
 
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -160,17 +161,19 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className="container mx-auto px-6 md:px-10 py-5">
+        <div className="container mx-auto px-4 sm:px-6 md:px-10 py-4 sm:py-5">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
                 JobScout
               </span>
             </Link>
-            <div className="flex items-center gap-4">
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
               <ThemeToggle />
               {session ? (
                 <>
@@ -202,20 +205,26 @@ export default function Home() {
                 </>
               )}
             </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex md:hidden items-center gap-2">
+              <ThemeToggle />
+              <MobileNav />
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Header */}
       <header className="relative backdrop-blur-md bg-white/30 dark:bg-slate-900/30 border-b border-white/20 dark:border-slate-700/20 shadow-lg">
-        <div className="container mx-auto px-6 md:px-10 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent animate-gradient">
+        <div className="container mx-auto px-4 sm:px-6 md:px-10 py-6 sm:py-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent animate-gradient">
               Browse Jobs
             </h1>
-            <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 animate-pulse" />
           </div>
-          <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-2 font-medium">
             Find your dream job across multiple platforms
             {session && userSkills.length > 0 && (
               <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">

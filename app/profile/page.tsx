@@ -193,13 +193,13 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <aside className="w-80 min-h-screen border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-          <div className="p-6 sticky top-0">
+        <aside className="hidden lg:block lg:w-80 lg:min-h-screen border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+          <div className="p-4 sm:p-6 lg:sticky lg:top-0">
             {/* Profile Picture */}
-            <div className="relative mb-6">
-              <div className="w-32 h-32 mx-auto relative">
+            <div className="relative mb-4 sm:mb-6">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto relative">
                 {profile?.profilePicUrl ? (
                   <Image
                     src={profile.profilePicUrl}
@@ -224,63 +224,63 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Info */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-4 sm:mb-6">
               {editMode ? (
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mb-2 text-center font-semibold"
+                  className="mb-2 text-center font-semibold text-sm sm:text-base"
                 />
               ) : (
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">
                   {name}
                 </h2>
               )}
-              <p className="text-sm text-slate-600 dark:text-slate-400">{session.user?.email}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">{session.user?.email}</p>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{savedJobs.length}</p>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 sm:p-3 rounded-lg text-center">
+                <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{savedJobs.length}</p>
                 <p className="text-xs text-slate-600 dark:text-slate-400">Saved</p>
               </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{appliedJobs.length}</p>
+              <div className="bg-green-50 dark:bg-green-900/20 p-2 sm:p-3 rounded-lg text-center">
+                <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{appliedJobs.length}</p>
                 <p className="text-xs text-slate-600 dark:text-slate-400">Applied</p>
               </div>
             </div>
 
             {/* Navigation */}
-            <nav className="space-y-2 mb-6">
+            <nav className="space-y-2 mb-4 sm:mb-6">
               <button
                 onClick={() => setActiveTab('saved')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
                   activeTab === 'saved'
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <Bookmark className="w-5 h-5" />
-                <span className="font-medium">Saved Jobs</span>
+                <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base font-medium">Saved Jobs</span>
               </button>
               <button
                 onClick={() => setActiveTab('applied')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
                   activeTab === 'applied'
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">Applied Jobs</span>
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base font-medium">Applied Jobs</span>
               </button>
             </nav>
 
             {/* Resume Section */}
-            <Card className="mb-6 bg-white/80 dark:bg-slate-900/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
+            <Card className="mb-4 sm:mb-6 bg-white/80 dark:bg-slate-900/80">
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Resume
                 </CardTitle>
@@ -325,18 +325,18 @@ export default function ProfilePage() {
                       <Button
                         onClick={handleManualParsing}
                         disabled={parsing}
-                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white mt-2"
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white mt-2 text-xs sm:text-sm h-8 sm:h-9"
                         size="sm"
                       >
                         {parsing ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Parsing...
+                            <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 animate-spin" />
+                            <span className="text-xs sm:text-sm">Parsing...</span>
                           </>
                         ) : (
                           <>
-                            <Settings className="w-4 h-4 mr-2" />
-                            Extract Skills
+                            <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Extract Skills</span>
                           </>
                         )}
                       </Button>
@@ -346,30 +346,30 @@ export default function ProfilePage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full h-10 border-dashed border-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      className="w-full h-8 sm:h-10 text-xs sm:text-sm border-dashed border-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                       onClick={() => setShowResumeModal(true)}
                     >
-                      <Upload className="w-4 h-4 mr-2" />
+                      <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       Update Resume
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <div className="flex items-center justify-center mb-4">
-                      <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full">
-                        <FileText className="w-10 h-10 text-slate-400" />
+                  <div className="text-center py-6 sm:py-8">
+                    <div className="flex items-center justify-center mb-3 sm:mb-4">
+                      <div className="bg-slate-100 dark:bg-slate-800 p-3 sm:p-4 rounded-full">
+                        <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400" />
                       </div>
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-3 sm:mb-4">
                       No resume uploaded yet
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-indigo-600 hover:to-purple-600 border-0"
+                      className="w-full h-8 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-indigo-600 hover:to-purple-600 border-0"
                       onClick={() => setShowResumeModal(true)}
                     >
-                      <Upload className="w-4 h-4 mr-2" />
+                      <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       Upload Resume
                     </Button>
                   </div>
@@ -383,7 +383,7 @@ export default function ProfilePage() {
                 <>
                   <Button
                     onClick={handleProfileUpdate}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-sm sm:text-base h-9 sm:h-10"
                     disabled={loading}
                   >
                     Save Changes
@@ -394,7 +394,7 @@ export default function ProfilePage() {
                       setName(profile?.name || '');
                     }}
                     variant="outline"
-                    className="w-full"
+                    className="w-full text-sm sm:text-base h-9 sm:h-10"
                   >
                     Cancel
                   </Button>
@@ -403,15 +403,15 @@ export default function ProfilePage() {
                 <Button
                   onClick={() => setEditMode(true)}
                   variant="outline"
-                  className="w-full"
+                  className="w-full text-sm sm:text-base h-9 sm:h-10"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Edit Profile
                 </Button>
               )}
               <Link href="/jobs" className="block">
-                <Button variant="outline" className="w-full">
-                  <Briefcase className="w-4 h-4 mr-2" />
+                <Button variant="outline" className="w-full text-sm sm:text-base h-9 sm:h-10">
+                  <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Browse Jobs
                 </Button>
               </Link>
@@ -420,14 +420,78 @@ export default function ProfilePage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 sm:p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
+            {/* Mobile Profile Header - Only visible on mobile */}
+            <div className="lg:hidden mb-6">
+              <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="relative w-16 h-16">
+                      {profile?.profilePicUrl ? (
+                        <Image
+                          src={profile.profilePicUrl}
+                          alt={name}
+                          fill
+                          className="rounded-full object-cover border-2 border-blue-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center border-2 border-blue-500">
+                          <span className="text-xl font-bold text-white">
+                            {name?.[0]?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">{name}</h2>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">{session.user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-center">
+                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{savedJobs.length}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">Saved</p>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-center">
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">{appliedJobs.length}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">Applied</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={() => setActiveTab('saved')}
+                      className={`text-xs h-9 ${
+                        activeTab === 'saved'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <Bookmark className="w-3 h-3 mr-1" />
+                      Saved
+                    </Button>
+                    <Button
+                      onClick={() => setActiveTab('applied')}
+                      className={`text-xs h-9 ${
+                        activeTab === 'applied'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Applied
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <div className="mb-4 sm:mb-6 md:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">
                 {activeTab === 'saved' ? 'Saved Jobs' : 'Applied Jobs'}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
                 {activeTab === 'saved' 
                   ? 'Jobs you\'ve bookmarked for later'
                   : 'Track your job applications'
@@ -439,16 +503,16 @@ export default function ProfilePage() {
             {activeTab === 'saved' && (
               savedJobs.length === 0 ? (
                 <Card className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90">
-                  <CardContent className="py-16 text-center">
-                    <Bookmark className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  <CardContent className="py-8 sm:py-12 md:py-16 text-center px-4">
+                    <Bookmark className="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
                       No saved jobs yet
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6">
+                    <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-4 sm:mb-6">
                       Start browsing and save jobs you`re interested in
                     </p>
                     <Link href="/jobs">
-                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 w-full sm:w-auto text-sm sm:text-base">
                         Browse Jobs
                       </Button>
                     </Link>
@@ -458,31 +522,31 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {savedJobs.map((job) => (
                     <Card key={job._id} className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90 hover:scale-105 transition-transform">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
-                          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500">
+                      <CardHeader className="p-4 sm:p-6">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-base sm:text-lg line-clamp-2">{job.title}</CardTitle>
+                          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-xs shrink-0">
                             {job.source}
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <Briefcase className="w-4 h-4" />
-                          {job.company}
+                      <CardContent className="space-y-2 sm:space-y-3 p-4 sm:p-6 pt-0">
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                          <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{job.company}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <MapPin className="w-4 h-4" />
-                          {job.location}
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{job.location}</span>
                         </div>
                         {job.salary && (
-                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salary}
+                          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                            <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                            <span className="truncate">{job.salary}</span>
                           </div>
                         )}
                         <Link href={`/jobs/${job._id}`}>
-                          <Button variant="outline" className="w-full mt-4">
+                          <Button variant="outline" className="w-full mt-3 sm:mt-4 text-sm sm:text-base h-9 sm:h-10">
                             View Details
                           </Button>
                         </Link>
@@ -496,16 +560,16 @@ export default function ProfilePage() {
             {activeTab === 'applied' && (
               appliedJobs.length === 0 ? (
                 <Card className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90">
-                  <CardContent className="py-16 text-center">
-                    <CheckCircle className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  <CardContent className="py-8 sm:py-12 md:py-16 text-center px-4">
+                    <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-slate-400 mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
                       No applications yet
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6">
+                    <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-4 sm:mb-6">
                       Start applying to jobs and track them here
                     </p>
                     <Link href="/jobs">
-                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 w-full sm:w-auto text-sm sm:text-base">
                         Start Applying
                       </Button>
                     </Link>
@@ -515,31 +579,31 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {appliedJobs.map((job) => (
                     <Card key={job._id} className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90 hover:scale-105 transition-transform border-l-4 border-green-500">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
-                          <Badge className="bg-gradient-to-r from-green-600 to-emerald-600">
+                      <CardHeader className="p-4 sm:p-6">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-base sm:text-lg line-clamp-2">{job.title}</CardTitle>
+                          <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-xs shrink-0">
                             Applied
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <Briefcase className="w-4 h-4" />
-                          {job.company}
+                      <CardContent className="space-y-2 sm:space-y-3 p-4 sm:p-6 pt-0">
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                          <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{job.company}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <MapPin className="w-4 h-4" />
-                          {job.location}
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{job.location}</span>
                         </div>
                         {job.salary && (
-                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salary}
+                          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                            <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
+                            <span className="truncate">{job.salary}</span>
                           </div>
                         )}
                         <Link href={`/jobs/${job._id}`}>
-                          <Button variant="outline" className="w-full mt-4">
+                          <Button variant="outline" className="w-full mt-3 sm:mt-4 text-sm sm:text-base h-9 sm:h-10">
                             View Details
                           </Button>
                         </Link>
@@ -557,19 +621,19 @@ export default function ProfilePage() {
       {showProfilePicModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
                 Upload Profile Picture
               </h2>
               <button
                 onClick={() => setShowProfilePicModal(false)}
                 className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <FileUpload
                 type="profilePic"
                 currentUrl={profile?.profilePicUrl}
@@ -578,11 +642,11 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+            <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-700">
               <Button
                 onClick={() => setShowProfilePicModal(false)}
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base h-9 sm:h-10"
               >
                 Close
               </Button>
@@ -595,19 +659,19 @@ export default function ProfilePage() {
       {showResumeModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
                 Upload Resume
               </h2>
               <button
                 onClick={() => setShowResumeModal(false)}
                 className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <FileUpload
                 type="resume"
                 currentUrl={profile?.resumeUrl}
@@ -616,11 +680,11 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+            <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-700">
               <Button
                 onClick={() => setShowResumeModal(false)}
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base h-9 sm:h-10"
               >
                 Close
               </Button>

@@ -7,15 +7,19 @@ JobScout is a modern job aggregation web platform that collects job listings fro
 ## 🚀 Features
 
 - **Unified Job Search** - Search across Adzuna, JSearch, and Jooble APIs
+- **AI Skill Matching** - Upload resume and get intelligent compatibility scores for every job
+- **Trending Analytics** - Discover hottest job domains with real-time trending insights
+- **Smart Location Priority** - India-based jobs prioritized automatically when browsing
+- **Match Score Sorting** - Sort jobs by compatibility score for better career alignment
 - **User Authentication** - Google OAuth and email/password sign in with NextAuth
-- **User Profiles** - Save favorite jobs and track applications
-- **Advanced Filtering** - Filter by location, job type, salary, and source
+- **User Profiles** - Save favorite jobs with match scores and track applications
+- **Advanced Filtering** - Filter by location, job type, salary, source, and more
 - **Duplicate Free** - Smart filtering removes duplicate listings
-- **Dark/Light Theme** - Beautiful UI with theme toggle
+- **Dark/Light Theme** - Beautiful UI with seamless theme toggle
 - **Real-time Updates** - Automated job fetching every 6 hours via cron
 - **Global Reach** - Support for India, US, UK, Canada, Australia, and more
 - **Modern UI** - Glassmorphic design with gradients and animations
-- **Responsive** - Works seamlessly on desktop and mobile
+- **Responsive** - Mobile-first design with hamburger navigation
 - **SEO Friendly** - Optimized job pages for search engines
 
 ---
@@ -49,6 +53,8 @@ JobScout solves this by aggregating job data from multiple sources and presentin
 - **shadcn/ui** - Modern component library
 - **next-themes** - Dark/light mode support
 - **lucide-react** - Beautiful icons
+- **pdf-parse** - Resume parsing for skill extraction
+- **mammoth** - DOCX document processing
 
 ### Backend
 - **Next.js API Routes** - Serverless API endpoints
@@ -165,7 +171,10 @@ jobscout/
 │   │   ├── jobs/
 │   │   │   ├── route.ts                 # List jobs with filters
 │   │   │   └── [id]/route.ts            # Single job details
-│   │   ├── user/jobs/route.ts           # User's saved/applied jobs
+│   │   ├── user/
+│   │   │   ├── jobs/route.ts            # User's saved/applied jobs
+│   │   │   └── jobs/apply/route.ts      # Apply/remove jobs
+│   │   ├── trending/route.ts            # Trending job domains
 │   │   └── clean-duplicates/route.ts    # Duplicate removal
 │   ├── auth/
 │   │   ├── signin/page.tsx              # Sign in page
@@ -173,6 +182,7 @@ jobscout/
 │   ├── jobs/
 │   │   ├── page.tsx                     # Job listings page
 │   │   └── [id]/page.tsx                # Job detail page
+│   ├── trending/page.tsx                # Trending jobs analysis
 │   ├── profile/page.tsx                 # User profile dashboard
 │   ├── admin/page.tsx                   # Admin job fetch panel
 │   ├── page.tsx                         # Landing page
@@ -183,11 +193,13 @@ jobscout/
 │   ├── JobCard.tsx                      # Job listing card
 │   ├── Filters.tsx                      # Search & filter form
 │   ├── Pagination.tsx                   # Page navigation
+│   ├── MobileNav.tsx                    # Mobile hamburger menu
 │   ├── theme-provider.tsx               # Theme context
 │   └── theme-toggle.tsx                 # Dark/light mode toggle
 ├── lib/
 │   ├── db.ts                            # MongoDB connection
 │   ├── mongodb-client.ts                # MongoClient for NextAuth
+│   ├── utils.ts                         # Skill matching utilities
 │   └── jobApis/
 │       ├── adzuna.ts                    # Adzuna integration
 │       ├── jsearch.ts                   # JSearch integration
@@ -211,7 +223,9 @@ jobscout/
 ### Public Endpoints
 - `GET /api/jobs` - List jobs with pagination and filters
   - Query params: `search`, `location`, `jobType`, `source`, `page`, `limit`
+  - India location prioritization when no filters applied
 - `GET /api/jobs/[id]` - Get single job details
+- `GET /api/trending` - Get trending job domains with analytics
 
 ### Authentication Endpoints
 - `POST /api/auth/register` - Register new user
@@ -219,6 +233,8 @@ jobscout/
 
 ### Protected Endpoints (Require Authentication)
 - `GET /api/user/jobs` - Get user's saved and applied jobs
+- `POST /api/user/jobs/apply` - Mark job as applied
+- `DELETE /api/user/jobs/apply` - Remove job from applied list
 - `POST /api/fetch-jobs` - Manually trigger job fetching (admin or cron)
 - `GET /api/clean-duplicates` - Check duplicate statistics
 - `DELETE /api/clean-duplicates` - Remove duplicate jobs
@@ -228,9 +244,11 @@ jobscout/
 ## 🔍 Search & Filters
 
 - **Text Search** - Search in job title, description, company name
-- **Location Filter** - Filter by city/country
+- **Location Filter** - Filter by city/country with India prioritization
 - **Job Type Filter** - Full-time, Part-time, Contract, Internship
 - **Source Filter** - Adzuna, JSearch, Jooble
+- **Match Score Sorting** - Sort by skill compatibility percentage
+- **Trending Analysis** - View jobs grouped by domain (15 categories)
 - **Pagination** - 20 jobs per page with navigation
 
 ---
@@ -405,16 +423,19 @@ Jobs are automatically fetched every 6 hours for India, US, UK locations.
 - ✅ Landing page (Completed)
 - ✅ Profile dashboard (Completed)
 - ✅ Dark/light theme (Completed)
-- 🔄 Save job functionality (In Progress)
-- 🔄 Track applications (In Progress)
+- ✅ Save job functionality (Completed)
+- ✅ Track applications (Completed)
+- ✅ Resume skill matching (Completed)
+- ✅ Match score calculation (Completed)
+- ✅ Trending job analytics (Completed)
+- ✅ India location prioritization (Completed)
+- ✅ Mobile responsive navigation (Completed)
 - ⏳ AI-based job recommendations
-- ⏳ Resume matching score
 - ⏳ Job alerts via email/SMS
-- ⏳ Advanced user profiles with resume upload
-- ⏳ Admin analytics dashboard
-- ⏳ Job market insights and trends
+- ⏳ Advanced analytics dashboard
 - ⏳ Company reviews and ratings
 - ⏳ Salary insights and negotiation tips
+- ⏳ Interview preparation resources
 
 ---
 

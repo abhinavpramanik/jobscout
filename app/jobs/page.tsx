@@ -163,14 +163,24 @@ export default function Home() {
       <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
         <div className="container mx-auto px-4 sm:px-6 md:px-10 py-4 sm:py-5">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
-                <Briefcase className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-4 sm:space-x-8">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
+                  <Briefcase className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                  JobScout
+                </span>
+              </Link>
+              <div className="hidden md:flex space-x-6">
+                <Link href="/jobs" className="text-blue-600 dark:text-blue-400 font-medium">
+                  Jobs
+                </Link>
+                <Link href="/trending" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Trending
+                </Link>
               </div>
-              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                JobScout
-              </span>
-            </Link>
+            </div>
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-4">
@@ -311,10 +321,10 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative mt-12 backdrop-blur-md bg-gradient-to-r from-gray-900/90 via-blue-900/90 to-purple-900/90 text-white border-t border-slate-700/50">
-        <div className="container mx-auto px-6 md:px-10 py-10 text-center">
+      <footer className="relative mt-12 backdrop-blur-md bg-gradient-to-r from-slate-900/90 via-blue-900/90 to-indigo-900/90 dark:from-slate-950/90 dark:via-blue-950/90 dark:to-indigo-950/90 text-white border-t border-slate-700/50">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-8 text-center">
           <p className="font-semibold">&copy; 2026 JobScout - Job Aggregation Platform</p>
-          <p className="text-sm text-gray-300 mt-2">Created with ❤️ by Abhinav Pramanik</p>
+          <p className="text-sm text-slate-300 dark:text-slate-400 mt-2">Created with ❤️ by Abhinav Pramanik</p>
         </div>
       </footer>
     </div>

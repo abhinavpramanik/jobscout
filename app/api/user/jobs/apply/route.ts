@@ -65,3 +65,55 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/**
+ * DELETE /api/user/jobs/apply
+ * Remove a job from applied jobs
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { jobId } = await request.json();
+
+    if (!jobId) {
+      return NextResponse.json(
+        { error: 'Job ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const user = await User.findOne({ email: session.user.email });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Remove from applied jobs
+    user.appliedJobs = user.appliedJobs.filter((id: any) => id.toString() !== jobId);
+    await user.save();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Job removed from applied jobs',
+      applied: false,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

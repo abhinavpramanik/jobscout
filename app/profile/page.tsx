@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import FileUpload from '@/components/FileUpload';
+import { calculateSkillMatch } from '@/lib/skillMatcher';
+import { extractSkillsFromText } from '@/lib/skillsDatabase';
 import { 
   Briefcase, 
   MapPin, 
@@ -24,7 +26,8 @@ import {
   Trash2,
   Edit,
   X,
-  Eye
+  Eye,
+  XCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -62,6 +65,7 @@ export default function ProfilePage() {
   const [showProfilePicModal, setShowProfilePicModal] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -92,6 +96,7 @@ export default function ProfilePage() {
         const profileData = await profileRes.json();
         setProfile(profileData.user);
         setName(profileData.user.name);
+        setUserSkills(profileData.user?.skills || []);
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error);
@@ -176,6 +181,22 @@ export default function ProfilePage() {
       // Silent error handling
     } finally {
       setParsing(false);
+    }
+  };
+
+  const handleRemoveAppliedJob = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/user/jobs/apply`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId }),
+      });
+
+      if (response.ok) {
+        setAppliedJobs(appliedJobs.filter(job => job._id !== jobId));
+      }
+    } catch (error) {
+      // Silent error handling
     }
   };
 
@@ -520,14 +541,38 @@ export default function ProfilePage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {savedJobs.map((job) => (
+                  {savedJobs.map((job) => {
+                    // Calculate match score
+                    let matchScore = 0;
+                    if (userSkills.length > 0) {
+                      const jobText = `${job.title} ${job.description} ${job.company}`;
+                      const jobSkills = extractSkillsFromText(jobText);
+                      if (jobSkills.length > 0) {
+                        const matchResult = calculateSkillMatch(userSkills, jobSkills);
+                        matchScore = matchResult.matchScore;
+                      }
+                    }
+                    
+                    return (
                     <Card key={job._id} className="backdrop-blur-sm bg-white/90 dark:bg-slate-900/90 hover:scale-105 transition-transform">
                       <CardHeader className="p-4 sm:p-6">
                         <div className="flex items-start justify-between gap-2">
                           <CardTitle className="text-base sm:text-lg line-clamp-2">{job.title}</CardTitle>
-                          <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-xs shrink-0">
-                            {job.source}
-                          </Badge>
+                          <div className="flex flex-col gap-1 items-end">
+                            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-xs shrink-0">
+                              {job.source}
+                            </Badge>
+                            {userSkills.length > 0 && matchScore > 0 && (
+                              <Badge className={`text-xs shrink-0 ${
+                                matchScore >= 70 ? 'bg-green-500' :
+                                matchScore >= 50 ? 'bg-blue-500' :
+                                matchScore >= 30 ? 'bg-yellow-500' :
+                                'bg-orange-500'
+                              }`}>
+                                {matchScore}%
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-2 sm:space-y-3 p-4 sm:p-6 pt-0">
@@ -552,7 +597,8 @@ export default function ProfilePage() {
                         </Link>
                       </CardContent>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
               )
             )}
@@ -602,11 +648,22 @@ export default function ProfilePage() {
                             <span className="truncate">{job.salary}</span>
                           </div>
                         )}
-                        <Link href={`/jobs/${job._id}`}>
-                          <Button variant="outline" className="w-full mt-3 sm:mt-4 text-sm sm:text-base h-9 sm:h-10">
-                            View Details
+                        <div className="flex gap-2 mt-3 sm:mt-4">
+                          <Link href={`/jobs/${job._id}`} className="flex-1">
+                            <Button variant="outline" className="w-full text-sm sm:text-base h-9 sm:h-10">
+                              View Details
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="destructive" 
+                            size="icon"
+                            className="h-9 sm:h-10 w-9 sm:w-10 shrink-0"
+                            onClick={() => handleRemoveAppliedJob(job._id)}
+                            title="Remove from applied"
+                          >
+                            <XCircle className="w-4 h-4" />
                           </Button>
-                        </Link>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

@@ -5,6 +5,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
+import MobileNav from '@/components/MobileNav';
 import { 
   Briefcase, 
   Search, 
@@ -16,7 +17,9 @@ import {
   ArrowRight,
   Sparkles,
   User,
-  LogOut
+  LogOut,
+  Menu,
+  Award
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -27,29 +30,29 @@ export default function LandingPage() {
       description: 'Search across multiple job portals in one place - Adzuna, JSearch, and Jooble.'
     },
     {
-      icon: <Zap className="w-6 h-6" />,
-      title: 'Real-time Updates',
-      description: 'Automated job fetching every 6 hours to keep listings fresh and relevant.'
-    },
-    {
-      icon: <Shield className="w-6 h-6" />,
-      title: 'Duplicate Free',
-      description: 'Smart filtering removes duplicate listings so you see unique opportunities.'
-    },
-    {
-      icon: <Globe className="w-6 h-6" />,
-      title: 'Global Reach',
-      description: 'Access jobs from India, US, UK, Canada, Australia, and more countries.'
+      icon: <Award className="w-6 h-6" />,
+      title: 'AI Skill Matching',
+      description: 'Intelligent skill matching system analyzes your resume and calculates compatibility scores for every job listing.'
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      title: 'Advanced Filters',
-      description: 'Filter by location, job type, salary, experience, and source platform.'
+      title: 'Trending Insights',
+      description: 'Discover the hottest job domains with real-time trending analytics across industries and technologies.'
+    },
+    {
+      icon: <Globe className="w-6 h-6" />,
+      title: 'Smart Location Priority',
+      description: 'Intelligent location prioritization shows you relevant Indian jobs first while maintaining global reach.'
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: 'Real-time Updates',
+      description: 'Automated job fetching every 6 hours to keep listings fresh and relevant with duplicate removal.'
     },
     {
       icon: <Briefcase className="w-6 h-6" />,
       title: 'Save & Track',
-      description: 'Save favorite jobs and track your applications all in one dashboard.'
+      description: 'Save favorite jobs with match scores, track applications, and manage your job search all in one dashboard.'
     }
   ];
 
@@ -76,7 +79,7 @@ export default function LandingPage() {
                 JobScout
               </span>
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               <ThemeToggle />
               {session ? (
                 <>
@@ -112,6 +115,11 @@ export default function LandingPage() {
                   </Link>
                 </>
               )}
+            </div>
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <MobileNav />
             </div>
           </div>
         </div>

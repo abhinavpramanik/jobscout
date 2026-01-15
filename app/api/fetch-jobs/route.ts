@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Job from '@/models/Job';
 import { fetchAllJobs } from '@/lib/jobApis';
+// @ts-ignore - JavaScript module in TypeScript project
+import { runScrapingWorkflow } from '@/scrapers/index.js';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes max execution time for scraping
 
 /**
  * POST /api/fetch-jobs
@@ -24,76 +27,106 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body for custom query/location
+    // Parse request body for custom query/location and options
     let query = 'software developer';
     let location = 'India';
+    let enableScraping = true; // Enable web scraping by default
+    let maxPages = 2; // Default pages per scraper
 
     try {
       const body = await request.json();
       query = body.query || query;
       location = body.location || location;
+      enableScraping = body.enableScraping !== undefined ? body.enableScraping : enableScraping;
+      maxPages = body.maxPages || maxPages;
     } catch {
       // Use default values if no body provided
     }
 
-    console.log(`Fetching jobs: query="${query}", location="${location}"`);
+    console.log(`Fetching jobs: query="${query}", location="${location}", scraping=${enableScraping}`);
 
     // Connect to database
     await dbConnect();
 
-    // Fetch jobs from all APIs
+    // Initialize result statistics
+    let apiStats = { fetched: 0, saved: 0, duplicates: 0, errors: 0, sources: {} };
+    let scrapingStats = null;
+
+    // Step 1: Fetch jobs from external APIs (Adzuna, JSearch, Jooble)
+    console.log('--- Starting API job fetching ---');
     const { jobs, totalFetched, sources } = await fetchAllJobs({
       query,
       location,
     });
 
-    if (jobs.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: 'No jobs found from any API',
-        stats: {
-          fetched: 0,
-          saved: 0,
-          duplicates: 0,
-          errors: 0,
-        },
-        sources,
-      });
-    }
-
-    // Save jobs to database (handle duplicates)
+    // Save API jobs to database
     let savedCount = 0;
     let duplicateCount = 0;
     let errorCount = 0;
 
     for (const jobData of jobs) {
       try {
-        // Try to create new job (unique index will prevent duplicates)
         await Job.create(jobData);
         savedCount++;
       } catch (error: any) {
-        // Duplicate key error (code 11000)
         if (error.code === 11000) {
           duplicateCount++;
         } else {
           errorCount++;
-          console.error('Error saving job:', error.message);
+          console.error('Error saving API job:', error.message);
         }
       }
     }
 
-    console.log(`Job fetch complete: ${savedCount} saved, ${duplicateCount} duplicates, ${errorCount} errors`);
+    apiStats = {
+      fetched: totalFetched,
+      saved: savedCount,
+      duplicates: duplicateCount,
+      errors: errorCount,
+      sources,
+    };
+
+    console.log(`API jobs: ${savedCount} saved, ${duplicateCount} duplicates, ${errorCount} errors`);
+
+    // Step 2: Run web scrapers if enabled
+    if (enableScraping) {
+      console.log('--- Starting web scraping ---');
+      
+      try {
+        const scrapingResults = await runScrapingWorkflow(Job, {
+          keyword: query,
+          location,
+          maxPages,
+          enabledScrapers: ['indeed', 'internshala', 'timesjobs'],
+        });
+
+        scrapingStats = scrapingResults;
+        console.log('Web scraping completed:', scrapingResults);
+      } catch (scrapingError) {
+        console.error('Web scraping failed:', scrapingError);
+        scrapingStats = {
+          success: false,
+          error: scrapingError instanceof Error ? scrapingError.message : 'Unknown scraping error',
+        };
+      }
+    } else {
+      console.log('Web scraping disabled');
+    }
+
+    // Prepare final response
+    const totalSaved = apiStats.saved + (scrapingStats?.database?.inserted || 0);
+    const totalDuplicates = apiStats.duplicates + (scrapingStats?.database?.duplicates || 0);
 
     return NextResponse.json({
       success: true,
-      message: 'Jobs fetched and stored successfully',
-      stats: {
-        fetched: totalFetched,
-        saved: savedCount,
-        duplicates: duplicateCount,
-        errors: errorCount,
+      message: 'Job fetching completed',
+      api: apiStats,
+      scraping: scrapingStats,
+      summary: {
+        totalSaved,
+        totalDuplicates,
+        totalFetched: apiStats.fetched + (scrapingStats?.scraping?.total || 0),
       },
-      sources,
     });
   } catch (error) {
     console.error('Error in fetch-jobs API:', error);

@@ -50,7 +50,7 @@ const JobSchema: Schema<IJob> = new Schema(
     source: {
       type: String,
       required: true,
-      enum: ['Adzuna', 'JSearch', 'Jooble'],
+      enum: ['Adzuna', 'JSearch', 'Jooble', 'Indeed', 'Internshala', 'TimesJobs'],
     },
     applyLink: {
       type: String,

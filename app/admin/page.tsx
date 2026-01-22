@@ -10,7 +10,18 @@ import MobileNav from '@/components/MobileNav';
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ 
+    message?: string; 
+    error?: string; 
+    success?: boolean;
+    stats?: {
+      fetched: number;
+      saved: number;
+      duplicates: number;
+      errors: number;
+    };
+    sources?: Record<string, number>;
+  } | null>(null);
   const [query, setQuery] = useState('software developer');
   const [location, setLocation] = useState('India');
 

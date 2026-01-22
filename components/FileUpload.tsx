@@ -101,8 +101,8 @@ export default function FileUpload({ type, currentUrl, onUploadSuccess, onDelete
           fileInputRef.current.value = '';
         }
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload file');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to upload file');
     } finally {
       setUploading(false);
     }

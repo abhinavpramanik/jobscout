@@ -12,7 +12,10 @@ export const maxDuration = 60; // 1 minute for search queries
 /**
  * Calculate matching score for a job based on search query
  */
-function calculateMatchScore(job: any, searchQuery: string): number {
+import { Job as JobType } from '@/types/job';
+import mongoose from 'mongoose';
+
+function calculateMatchScore(job: JobType, searchQuery: string): number {
   if (!searchQuery) return 0;
   
   const query = searchQuery.toLowerCase();
@@ -83,7 +86,7 @@ export async function GET(request: NextRequest) {
     const fetchLive = searchParams.get('fetchLive') !== 'false'; // Default true
 
     // Build filter query
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
 
     // Text search
     const search = searchParams.get('search');
@@ -131,7 +134,7 @@ export async function GET(request: NextRequest) {
 
     // Sort
     const sortParam = searchParams.get('sort') || '-createdAt';
-    let sort: any = {};
+    let sort: Record<string, 1 | -1> = {};
     
     if (sortParam.startsWith('-')) {
       sort[sortParam.substring(1)] = -1;
@@ -193,9 +196,9 @@ export async function GET(request: NextRequest) {
             const newJob = await Job.create(jobData);
             jobs.push(newJob.toObject());
             liveJobsFetched++;
-          } catch (error: any) {
-            if (error.code !== 11000) { // Ignore duplicates
-              console.error('Error saving live job:', error.message);
+          } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'code' in error && error.code !== 11000) { // Ignore duplicates
+              console.error('Error saving live job:', error instanceof Error ? error.message : 'Unknown error');
             }
           }
         }
@@ -215,23 +218,22 @@ export async function GET(request: NextRequest) {
               setTimeout(() => reject(new Error('Scraping timeout')), 20000)
             );
 
-            const scrapingResults = await Promise.race([scrapingPromise, timeoutPromise]) as any;
+            const scrapingResults = await Promise.race([scrapingPromise, timeoutPromise]) as Record<string, unknown>;
             
-            // Save scraped jobs
-            const allScrapedJobs = [
-              ...(scrapingResults.indeed || []),
-              ...(scrapingResults.internshala || []),
-              ...(scrapingResults.timesjobs || []),
-            ];
+            // Save scraped jobs with proper type checking
+            const allScrapedJobs: unknown[] = [];
+            if (Array.isArray(scrapingResults.indeed)) allScrapedJobs.push(...scrapingResults.indeed);
+            if (Array.isArray(scrapingResults.internshala)) allScrapedJobs.push(...scrapingResults.internshala);
+            if (Array.isArray(scrapingResults.timesjobs)) allScrapedJobs.push(...scrapingResults.timesjobs);
 
             for (const jobData of allScrapedJobs.slice(0, 10)) { // Limit to 10 scraped jobs
               try {
-                const newJob = await Job.create(jobData);
-                jobs.push(newJob.toObject());
+                const newJob = await Job.create(jobData as Record<string, unknown>);
+                jobs.push(newJob.toObject() as any);
                 scrapedJobsFetched++;
-              } catch (error: any) {
-                if (error.code !== 11000) {
-                  console.error('Error saving scraped job:', error.message);
+              } catch (error: unknown) {
+                if (error && typeof error === 'object' && 'code' in error && error.code !== 11000) {
+                  console.error('Error saving scraped job:', error instanceof Error ? error.message : 'Unknown error');
                 }
               }
             }
@@ -250,13 +252,29 @@ export async function GET(request: NextRequest) {
 
     // Calculate match scores for search results
     if (search) {
-      jobs = jobs.map(job => ({
-        ...job,
-        matchScore: calculateMatchScore(job, search),
-      }));
+      jobs = jobs.map(job => {
+        const jobObject = job.toObject ? job.toObject() : job;
+        return {
+          ...jobObject,
+          _id: jobObject._id.toString(),
+          matchScore: calculateMatchScore({
+            ...jobObject,
+            _id: jobObject._id.toString()
+          } as JobType, search),
+        };
+      });
 
       // Sort by match score if searching
-      jobs.sort((a: any, b: any) => (b.matchScore || 0) - (a.matchScore || 0));
+      jobs.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+    } else {
+      // Convert _id to string for consistency
+      jobs = jobs.map(job => {
+        const jobObject = job.toObject ? job.toObject() : job;
+        return {
+          ...jobObject,
+          _id: jobObject._id.toString()
+        };
+      });
     }
 
     const totalPages = Math.ceil(total / limit);
@@ -275,7 +293,7 @@ export async function GET(request: NextRequest) {
       meta: {
         liveJobsFetched,
         scrapedJobsFetched,
-        sources: [...new Set(jobs.map((j: any) => j.source))],
+        sources: [...new Set(jobs.map((j) => j.source))],
       },
     });
   } catch (error) {

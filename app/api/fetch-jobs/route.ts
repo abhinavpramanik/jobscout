@@ -68,12 +68,12 @@ export async function POST(request: NextRequest) {
       try {
         await Job.create(jobData);
         savedCount++;
-      } catch (error: any) {
-        if (error.code === 11000) {
+      } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
           duplicateCount++;
         } else {
           errorCount++;
-          console.error('Error saving API job:', error.message);
+          console.error('Error saving API job:', error instanceof Error ? error.message : 'Unknown error');
         }
       }
     }
@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare final response
-    const totalSaved = apiStats.saved + (scrapingStats?.database?.inserted || 0);
-    const totalDuplicates = apiStats.duplicates + (scrapingStats?.database?.duplicates || 0);
+    const totalSaved = apiStats.saved + (scrapingStats && typeof scrapingStats === 'object' && 'database' in scrapingStats && scrapingStats.database && typeof scrapingStats.database === 'object' && 'inserted' in scrapingStats.database ? (scrapingStats.database.inserted as number) || 0 : 0);
+    const totalDuplicates = apiStats.duplicates + (scrapingStats && typeof scrapingStats === 'object' && 'database' in scrapingStats && scrapingStats.database && typeof scrapingStats.database === 'object' && 'duplicates' in scrapingStats.database ? (scrapingStats.database.duplicates as number) || 0 : 0);
 
     return NextResponse.json({
       success: true,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       summary: {
         totalSaved,
         totalDuplicates,
-        totalFetched: apiStats.fetched + (scrapingStats?.scraping?.total || 0),
+        totalFetched: apiStats.fetched + (scrapingStats && typeof scrapingStats === 'object' && 'scraping' in scrapingStats && scrapingStats.scraping && typeof scrapingStats.scraping === 'object' && 'total' in scrapingStats.scraping ? (scrapingStats.scraping.total as number) || 0 : 0),
       },
     });
   } catch (error) {

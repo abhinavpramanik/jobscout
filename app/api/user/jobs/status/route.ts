@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import mongoose from 'mongoose';
 
 export const runtime = 'nodejs';
 
@@ -41,8 +42,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const saved = user.savedJobs.some((id: any) => id.toString() === jobId);
-    const applied = user.appliedJobs.some((id: any) => id.toString() === jobId);
+    const saved = user.savedJobs.some((id: mongoose.Types.ObjectId) => id.toString() === jobId);
+    const applied = user.appliedJobs.some((id: mongoose.Types.ObjectId) => id.toString() === jobId);
 
     return NextResponse.json({
       saved,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import mongoose from 'mongoose';
 
 export const runtime = 'nodejs';
 
@@ -102,7 +103,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove from applied jobs
-    user.appliedJobs = user.appliedJobs.filter((id: any) => id.toString() !== jobId);
+    user.appliedJobs = user.appliedJobs.filter((id: mongoose.Types.ObjectId) => id.toString() !== jobId);
     await user.save();
 
     return NextResponse.json({

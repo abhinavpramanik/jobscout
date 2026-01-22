@@ -8,11 +8,11 @@ import { parseResume } from '@/lib/resumeParser';
 export const runtime = 'nodejs';
 
 // Disable body parser to handle multipart/form-data
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 /**
  * POST /api/upload-profile

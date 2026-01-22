@@ -3,18 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import JobCard from '@/components/JobCard';
 import Filters, { FilterState } from '@/components/Filters';
 import Pagination from '@/components/Pagination';
 import { Job, JobsResponse } from '@/types/job';
-import { Sparkles, Briefcase, User, LogOut } from 'lucide-react';
+import { Sparkles, Briefcase, User, LogOut, Loader2 } from 'lucide-react';
 import { calculateSkillMatch } from '@/lib/skillMatcher';
 import { extractSkillsFromText } from '@/lib/skillsDatabase';
 import MobileNav from '@/components/MobileNav';
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,6 +39,13 @@ export default function Home() {
   });
 
   const [userSkills, setUserSkills] = useState<string[]>([]);
+
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    }
+  }, [status, router]);
 
   // Fetch user skills from profile
   const fetchUserSkills = async () => {
@@ -126,8 +136,6 @@ export default function Home() {
     }
   };
 
-  const { data: session } = useSession();
-
   // Fetch user skills when logged in
   useEffect(() => {
     if (session?.user) {
@@ -149,6 +157,23 @@ export default function Home() {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Show loading screen while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">

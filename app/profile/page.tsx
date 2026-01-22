@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import FileUpload from '@/components/FileUpload';
 import { calculateSkillMatch } from '@/lib/skillMatcher';
 import { extractSkillsFromText } from '@/lib/skillsDatabase';
+import { toast } from 'sonner';
 import { 
   Briefcase, 
   MapPin, 
@@ -163,10 +164,15 @@ export default function ProfilePage() {
 
   const handleManualParsing = async () => {
     if (!profile?.resumeUrl) {
+      toast.error('No resume uploaded', {
+        description: 'Please upload a resume first to extract skills.',
+      });
       return;
     }
 
     setParsing(true);
+    const loadingToast = toast.loading('Extracting skills from your resume...');
+    
     try {
       const response = await fetch('/api/parse-resume', {
         method: 'POST',
@@ -174,11 +180,25 @@ export default function ProfilePage() {
         body: JSON.stringify({ resumeUrl: profile.resumeUrl }),
       });
 
+      toast.dismiss(loadingToast);
+
       if (response.ok) {
-        fetchUserData();
+        const data = await response.json();
+        await fetchUserData();
+        toast.success('Skills extracted successfully!', {
+          description: `Found ${data.skills?.length || 0} skills from your resume.`,
+        });
+      } else {
+        const errorData = await response.json();
+        toast.error('Failed to extract skills', {
+          description: errorData.error || 'Please try again later.',
+        });
       }
     } catch (error) {
-      // Silent error handling
+      toast.dismiss(loadingToast);
+      toast.error('An error occurred', {
+        description: 'Failed to process your resume. Please try again.',
+      });
     } finally {
       setParsing(false);
     }
@@ -271,6 +291,31 @@ export default function ProfilePage() {
                 <p className="text-xs text-slate-600 dark:text-slate-400">Applied</p>
               </div>
             </div>
+
+            {/* Extracted Skills */}
+            {userSkills && userSkills.length > 0 && (
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Your Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {userSkills.slice(0, 10).map((skill, index) => (
+                    <Badge 
+                      key={index} 
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                  {userSkills.length > 10 && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs text-slate-600 dark:text-slate-400"
+                    >
+                      +{userSkills.length - 10} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Navigation */}
             <nav className="space-y-2 mb-4 sm:mb-6">

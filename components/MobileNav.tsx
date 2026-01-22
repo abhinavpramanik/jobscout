@@ -62,7 +62,7 @@ export default function MobileNav() {
                 <Link
                   href="/"
                   onClick={closeMenu}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
                 >
                   <Home className="w-5 h-5" />
                   <span className="font-medium">Home</span>
@@ -71,7 +71,7 @@ export default function MobileNav() {
                 <Link
                   href="/jobs"
                   onClick={closeMenu}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
                 >
                   <Briefcase className="w-5 h-5" />
                   <span className="font-medium">Jobs</span>
@@ -80,7 +80,7 @@ export default function MobileNav() {
                 <Link
                   href="/trending"
                   onClick={closeMenu}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
                 >
                   <TrendingUp className="w-5 h-5" />
                   <span className="font-medium">Trending</span>
@@ -90,18 +90,34 @@ export default function MobileNav() {
                   <Link
                     href="/profile"
                     onClick={closeMenu}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
                   >
                     <User className="w-5 h-5" />
                     <span className="font-medium">Profile</span>
                   </Link>
                 )}
 
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div className="px-4 py-2">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Theme</p>
+                {/* Divider */}
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700 mt-4">
+                  {/* Theme Toggle Section */}
+                  <div className="px-4 py-3 mb-2">
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">Appearance</p>
                     <ThemeToggle />
                   </div>
+
+                  {/* Sign Out Button for logged in users */}
+                  {session && (
+                    <button
+                      onClick={() => {
+                        signOut({ callbackUrl: '/' });
+                        closeMenu();
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all w-full"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  )}
                 </div>
               </nav>
 

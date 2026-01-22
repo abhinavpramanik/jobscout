@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -60,12 +60,14 @@ export default function TrendingPage() {
 
       {/* Navigation */}
       <nav className="relative backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-4">
-          <div className="flex justify-between items-center">
+        <div className="container mx-auto px-4 sm:px-6 md:px-10 py-4 sm:py-5">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 sm:space-x-8">
-              <Link href="/" className="flex items-center space-x-2">
-                <Briefcase className="h-6 w-6 sm:h-7 sm:w-7 text-blue-600 dark:text-blue-400" />
-                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
+                  <Briefcase className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
                   JobScout
                 </span>
               </Link>
@@ -80,21 +82,36 @@ export default function TrendingPage() {
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center gap-4">
               <ThemeToggle />
               {session ? (
                 <>
                   <Link href="/profile">
-                    <Button variant="outline" size="sm">
+                    <Button variant="ghost" className="text-slate-700 dark:text-slate-300">
                       <User className="w-4 h-4 mr-2" />
                       Profile
                     </Button>
                   </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="text-slate-700 dark:text-slate-300"
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
                 </>
               ) : (
-                <Link href="/auth/signin">
-                  <Button size="sm">Sign In</Button>
-                </Link>
+                <>
+                  <Link href="/auth/signin">
+                    <Button variant="ghost" className="text-slate-700 dark:text-slate-300">Sign In</Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
 

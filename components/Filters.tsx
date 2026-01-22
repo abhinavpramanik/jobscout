@@ -28,7 +28,7 @@ const JOB_TYPES = [
   'Freelance',
 ];
 
-const SOURCES = ['All Sources', 'Adzuna', 'JSearch', 'Jooble'];
+const SOURCES = ['All Sources', 'Adzuna', 'JSearch', 'Jooble', 'Web Scraping'];
 
 export default function Filters({ onFilterChange, isLoading }: FiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
